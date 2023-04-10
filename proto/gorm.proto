@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-gorm/options/gorm.proto";
+
+package responsetimesimulation.service;
+
+option go_package = "./server/pb";
+
+message Order {
+    option (gorm.opts) = {
+        ormable:true,
+        table: "order",
+    };
+
+    uint64 id = 1 [(gorm.field).tag = {primary_key: true not_null: true}];
+    string cutomer = 2 [(gorm.field).tag = {not_null: true}];
+    uint64 quantity = 3;
+    double price = 4;
+    uint64 requestId = 5 [(gorm.field).tag = {not_null: true}];
+	google.protobuf.Timestamp timestamp = 6;
+}

@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package responsetimesimulation.service;
+
+option go_package = "./server/pb";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+service ApiService {
+	rpc Store(StoreRequest) returns (StoreResponse) {
+		option (google.api.http) = {
+            post: "/api/store"
+			body: "*"
+        };
+	}
+
+	rpc List(Empty) returns (ListResponse) {
+		option (google.api.http) = {
+            get: "/api/list"
+        };
+	}
+}
+
+message Empty {
+}
+
+message StoreRequest {
+	uint64 request_id = 1;
+	repeated RequestData data = 2;
+}
+
+message RequestData {
+	uint64 id = 1;
+	string customer = 2;
+	uint64 quantity = 3;
+	double price = 4;
+	string timestamp = 5;
+}
+
+message StoreResponse {
+	bool success = 1;
+	uint64 code = 2;
+	string message = 3;
+}
+
+message ListResponse {
+	bool success = 1;
+	uint64 code = 2;
+	string message = 3;
+	repeated ListData data = 4;
+}
+
+message ListData {
+	uint64 id = 1;
+    string cutomer = 2;
+    uint64 quantity = 3;
+    double price = 4;
+    uint64 request_id = 5;
+	google.protobuf.Timestamp timestamp = 6;
+}
