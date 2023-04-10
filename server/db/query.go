@@ -8,20 +8,19 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (p *GormProvider) CreateData(ctx context.Context, data *pb.Order) (*pb.OrderORM, error) {
-	dataORM, _ := data.ToORM(ctx)
-	query := p.db_main.Debug()
-	if err := query.Create(&dataORM).Error; err != nil {
+func (p *GormProvider) CreateData(ctx context.Context, data []*pb.OrderORM) ([]*pb.OrderORM, error) {
+	query := p.db_main
+	if err := query.CreateInBatches(&data, 100).Error; err != nil {
 		return nil, status.Errorf(codes.Internal, "Internal Error: %v", err)
 	}
 
-	return &dataORM, nil
+	return data, nil
 }
 
 func (p *GormProvider) ListAllData(ctx context.Context) ([]*pb.OrderORM, error) {
 	data := []*pb.OrderORM{}
-	query := p.db_main.Debug()
-	if err := query.Find(&data).Error; err != nil {
+	query := p.db_main
+	if err := query.Order("id").Find(&data).Error; err != nil {
 		return nil, status.Errorf(codes.Internal, "Internal Error: %v", err)
 	}
 

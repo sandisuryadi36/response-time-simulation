@@ -48,6 +48,7 @@ message ListResponse {
 	bool success = 1;
 	uint64 code = 2;
 	string message = 3;
+	uint64 dataCount = 5;
 	repeated ListData data = 4;
 }
 
