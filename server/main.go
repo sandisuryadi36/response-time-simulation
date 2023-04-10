@@ -21,8 +21,7 @@ import (
 
 func main() {
 	// migrate DB
-	// !! ONLY ACTIVATE THIS FUNCTION AT FISRTTIME RUN
-	// migrateDB()
+	migrateDB()
 
 	// start DB connection
 	startDBConnection()
@@ -98,19 +97,3 @@ func GetEnv(key, fallback string) string {
 	return fallback
 }
 
-func migrateDB() error {
-	initDBMain()
-	defer closeDBMain()
-
-	log.Println("Migration process begin...")
-	if err := db_main.AutoMigrate(
-		&pb.OrderORM{},
-	); err != nil {
-		log.Fatalf("Migration failed: %v", err)
-		os.Exit(1)
-	}
-
-	log.Println("Migration process finished...")
-
-	return nil
-}

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"response-time-simulation/server/pb"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -57,4 +58,27 @@ func closeDBMain() {
 		log.Fatalf("Error on disconnection with DB Main : %v", err)
 	}
 	log.Println("Closing DB Main Success")
+}
+
+func migrateDB() error {
+	initDBMain()
+	defer closeDBMain()
+
+	migrator := db_main.Migrator()
+	if migrator.HasTable(&pb.OrderORM{}) {
+		log.Println("Table already exists, no migration needed")
+		return nil
+	}
+
+	log.Println("Migration process begin...")
+	if err := db_main.AutoMigrate(
+		&pb.OrderORM{},
+	); err != nil {
+		log.Fatalf("Migration failed: %v", err)
+		os.Exit(1)
+	}
+
+	log.Println("Migration process finished...")
+
+	return nil
 }
