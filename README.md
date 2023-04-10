@@ -21,10 +21,10 @@ Service ini bertujuan untuk mensimulasikan waktu respons dari request dengan jum
 > cd response-time-simulation
 
  5. Install semua dependencies yang dibutuhkan dengan menggunakan command:
- 6. Sesuaikan file `.env` dengan configurasi Postgre SQL anda.
 
 > go mod download
 
+ 6. Sesuaikan file `.env` dengan configurasi Postgre SQL anda.
 
  ## Menjalankan Service
 
