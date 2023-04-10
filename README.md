@@ -26,7 +26,7 @@ Service ini bertujuan untuk mensimulasikan waktu respons dari request dengan jum
 > go mod download
 
 
- ``## Menjalankan Service
+ ## Menjalankan Service
 
 1. Setelah melakukan setup, jalankan command `go run ./server` pada directory root project untuk memulai server.
 
@@ -47,4 +47,4 @@ Service ini bertujuan untuk mensimulasikan waktu respons dari request dengan jum
 >     	  ] 
 >     }
 
- 5. Setelah request berhasil terkirim, Anda akan menerima response dengan response time dari request tersebut.`
+ 5. Setelah request berhasil terkirim, Anda akan menerima response dengan response time dari request tersebut.
