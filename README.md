@@ -8,19 +8,20 @@ Service ini bertujuan untuk mensimulasikan waktu respons dari request dengan jum
 ## Setup
 
 1. Pastikan Anda telah memiliki database Postgre SQL yang terinstall di komputer Anda.
-2. Buatlah database baru dengan nama "simulation" pada database Postgre SQL dengan menggunakan perintah SQL berikut:` 
+2. Buatlah database baru dengan nama "simulation" pada database Postgre SQL dengan menggunakan perintah SQL berikut:
 
 > CREATE DATABASE simulation;
 
-4. Setelah itu, clone repository project dengan menggunakan command:` 
+4. Setelah itu, clone repository project dengan menggunakan command:
 
 > git clone https://github.com/sandisuryadi36/response-time-simulation.git
 
- 4. Masuk ke dalam folder project dengan menggunakan command:` 
+ 4. Masuk ke dalam folder project dengan menggunakan command: 
 
 > cd response-time-simulation
 
- 5. Install semua dependencies yang dibutuhkan dengan menggunakan command:` 
+ 5. Install semua dependencies yang dibutuhkan dengan menggunakan command:
+ 6. Sesuaikan file `.env` dengan configurasi Postgre SQL anda.
 
 > go mod download
 
