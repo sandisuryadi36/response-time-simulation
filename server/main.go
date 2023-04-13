@@ -27,7 +27,9 @@ func main() {
 	startDBConnection()
 
 	// Inisialisasi gRPC server
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(loggingMiddleware),
+	)
 
 	apiServ := api.New(
 		db_main,
@@ -56,7 +58,7 @@ func main() {
 	// Inisialisasi HTTP server
 	httpServer := &http.Server{
 		Addr:    ":8080",
-		Handler: gwMux,
+		Handler: loggingHTTPMiddleware(gwMux),
 	}
 
 	// Mulai server gRPC dan HTTP API

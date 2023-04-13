@@ -6,15 +6,19 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
-func (p *GormProvider) CreateData(ctx context.Context, data []*pb.OrderORM) ([]*pb.OrderORM, error) {
-	query := p.db_main
-	if err := query.CreateInBatches(&data, 100).Error; err != nil {
-		return nil, status.Errorf(codes.Internal, "Internal Error: %v", err)
-	}
+func (p *GormProvider) BeginTx(ctx context.Context) *gorm.DB {
+	return p.db_main.Begin()
+}
 
-	return data, nil
+func (p *GormProvider) CreateData(ctx context.Context, tx *gorm.DB, data *pb.OrderORM) (*pb.OrderORM, error) {
+	if err := tx.Create(&data).Error; err != nil {
+				return nil, status.Errorf(codes.Internal, "Internal Error: %v", err)
+			}
+		
+			return data, nil
 }
 
 func (p *GormProvider) ListAllData(ctx context.Context) ([]*pb.OrderORM, error) {

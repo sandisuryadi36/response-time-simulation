@@ -5,58 +5,82 @@ import (
 	"fmt"
 	"log"
 	"response-time-simulation/server/pb"
-	"sync"
 	"time"
-
-	"google.golang.org/protobuf/proto"
 )
 
 // GRPC Handler
 func (s *Server) Store(ctx context.Context, req *pb.StoreRequest) (*pb.StoreResponse, error) {
 	result := &pb.StoreResponse{
-		Success: true,
-		Code:    200,
-		Message: "Success storing data",
+			Success: true,
+			Code:    200,
+			Message: "Success storing data",
 	}
-
-	var wg sync.WaitGroup
 
 	log.Println("Storing data...")
 	resStartTime := time.Now().Local()
-	dataToStore := []*pb.OrderORM{}
-	for _, val := range req.GetData() {
-		goData := proto.Clone(val).(*pb.RequestData)
 
-		wg.Add(1)
-		go func(val *pb.RequestData) {
-			defer wg.Done()
-			startT := time.Now().Local()
+	// create a buffered channel to store the data
+	dataCh := make(chan *pb.OrderORM, 1000)
 
-			// time process simulation
-			time.Sleep(time.Duration(10) * time.Millisecond)
-
-			timestamp, err := time.ParseInLocation("2006-01-02 15:04:05", val.GetTimestamp(), time.Local)
-			if err != nil {
-				log.Println("Error parsing timestamp:", err)
+	// start a transaction
+	tx := s.provider.BeginTx(ctx)
+	defer func() {
+			if r := recover(); r != nil {
+					tx.Rollback()
+					log.Println("Recovered from panic:", r)
 			}
-			data := &pb.OrderORM{
-				Id:        val.GetId(),
-				Cutomer:   val.GetCustomer(),
-				Quantity:  val.GetQuantity(),
-				Price:     val.GetPrice(),
-				RequestId: req.GetRequestId(),
-				Timestamp: &timestamp,
+	}()
+
+	// process the data in batches using goroutine
+	batchSize := 50
+	numBatches := (len(req.GetData()) + batchSize - 1) / batchSize
+	for i := 0; i < numBatches; i++ {
+			start := i * batchSize
+			end := (i + 1) * batchSize
+			if end > len(req.GetData()) {
+					end = len(req.GetData())
 			}
 
-			dataToStore = append(dataToStore, data)
-			processT := time.Now().Local().Sub(startT)
-			log.Printf("Data ID: %v process time done in %v", data.Id,processT)
-		}(goData)
+			// process the batch in goroutine
+			go func(data []*pb.RequestData) {
+					for _, val := range data {
+						// simulate processing time
+						time.Sleep(10 * time.Millisecond)
+
+							timestamp, err := time.ParseInLocation("2006-01-02 15:04:05", val.GetTimestamp(), time.Local)
+							if err != nil {
+									log.Println("Error parsing timestamp:", err)
+									continue
+							}
+							data := &pb.OrderORM{
+									Id:        val.GetId(),
+									Cutomer:   val.GetCustomer(),
+									Quantity:  val.GetQuantity(),
+									Price:     val.GetPrice(),
+									RequestId: req.GetRequestId(),
+									Timestamp: &timestamp,
+							}
+
+							// send the data to the channel
+							dataCh <- data
+					}
+			}(req.GetData()[start:end])
 	}
-	wg.Wait()
-	s.provider.CreateData(ctx, dataToStore)
 
-	// wg.Wait()
+	// process the data in the channel
+	for j := 0; j < len(req.GetData()); j++ {
+			data := <-dataCh
+			if _, err := s.provider.CreateData(ctx, tx, data); err != nil {
+					tx.Rollback()
+					return nil, err
+			}
+	}
+
+	// commit the transaction
+	if err := tx.Commit().Error; err != nil {
+			return nil, err
+	}
+
 	resTime := time.Now().Local().Sub(resStartTime)
 	log.Println("Success store data in", resTime)
 	result.Message = fmt.Sprintf("Success store data in %v", resTime)
